@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Stethoscope } from "lucide-react"
 
 export function MediQuickHeader() {
@@ -14,7 +15,9 @@ export function MediQuickHeader() {
           <div className="ml-auto flex items-center gap-4">
             <button className="text-sm text-slate-600 hover:text-emerald-600">Dashboard</button>
             <button className="text-sm text-slate-600 hover:text-emerald-600">History</button>
-            <button className="text-sm text-slate-600 hover:text-emerald-600">Profile</button>
+            <Link href="/profile" legacyBehavior>
+              <a className="text-sm text-slate-600 hover:text-emerald-600">Profile</a>
+            </Link>
             <button className="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-emerald-600 transition-colors">
               Emergency
             </button>

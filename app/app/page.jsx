@@ -1,3 +1,5 @@
+"use client"
+import { useState } from "react"
 import { MediQuickHeader } from "@/components/header"
 import { ChatbotPanel } from "@/components/chatbot-panel"
 import { HealthScorePanel } from "@/components/health-score-panel"
@@ -5,9 +7,9 @@ import { TriageResultCard } from "@/components/triage-result-card"
 import { Dashboard } from "@/components/dashboard"
 import { HealthTip } from "@/components/health-tip"
 import { NearbyDoctors } from "@/components/nearby-doctors"
-import { HealthCard } from "@/components/health-card"
 
 export default function AppPage() {
+  const [triage, setTriage] = useState(null)
   // Use the same entries as Dashboard for demo; ideally, this should be shared state or fetched
   const previousEntries = [
     { date: "May 18, 2025", symptom: "Headache and dizziness", urgency: "green" },
@@ -16,13 +18,11 @@ export default function AppPage() {
     { date: "Apr 15, 2025", symptom: "Severe abdominal pain", urgency: "red" },
   ]
 
-  const mockUser = {
-    id: "demo123",
-    name: "John Doe",
-    email: "john.doe@email.com",
-    photoURL: "/placeholder-user.jpg",
-    bloodGroup: "O+",
-    allergies: "Peanuts"
+  // Default/fallback triage result
+  const defaultTriage = {
+    urgency: "yellow",
+    reason: "Persistent fever and cough for 3+ days",
+    tip: "Stay hydrated and consider scheduling a clinic visit within 24 hours."
   }
 
   return (
@@ -30,22 +30,18 @@ export default function AppPage() {
       <MediQuickHeader />
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ChatbotPanel />
+          <ChatbotPanel onTriageResult={setTriage} />
           <div className="space-y-6">
             <HealthScorePanel history={previousEntries} />
             <TriageResultCard
-              urgency="yellow"
-              reason="Persistent fever and cough for 3+ days"
-              tip="Stay hydrated and consider scheduling a clinic visit within 24 hours."
+              urgency={(triage?.urgency || defaultTriage.urgency)}
+              reason={(triage?.reason || defaultTriage.reason)}
+              tip={(triage?.tip || defaultTriage.tip)}
             />
           </div>
         </div>
 
         <Dashboard />
-
-        <div className="flex justify-center my-8">
-          <HealthCard user={mockUser} />
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
