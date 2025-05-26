@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Calendar, Clock, History } from "lucide-react"
 import { UrgencyChart } from "@/components/urgency-chart"
 
-export function Dashboard() {
+export function Dashboard({ latestUrgency }) {
   const previousEntries = [
     { date: "May 18, 2025", symptom: "Headache and dizziness", urgency: "green" },
     { date: "May 10, 2025", symptom: "Chest pain after exercise", urgency: "yellow" },
@@ -20,6 +20,14 @@ export function Dashboard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {latestUrgency === "yellow" && (
+          <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 flex items-center gap-3 rounded">
+            <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-bold uppercase tracking-wide text-sm">Clinic Visit Recommended</span>
+          </div>
+        )}
         <Tabs defaultValue="history">
           <TabsList className="mb-4">
             <TabsTrigger value="history" className="flex items-center gap-1">

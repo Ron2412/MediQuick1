@@ -34,7 +34,7 @@ function parseTriageResult(aiText) {
   return { urgency, reason, tip };
 }
 
-export function ChatbotPanel() {
+export function ChatbotPanel({ onTriageResult }) {
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hello! I'm MediQuick, your AI health assistant. Tell me about your symptoms or health concerns, and I'll help you decide what to do next." }
   ]);
@@ -80,6 +80,7 @@ export function ChatbotPanel() {
 
       // Parse triage result and set urgency banner if needed
       const triage = parseTriageResult(data.text);
+      if (onTriageResult) onTriageResult(triage);
       if (triage.urgency === "yellow") {
         setTriageBanner({
           color: "yellow",

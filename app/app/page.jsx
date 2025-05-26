@@ -41,7 +41,7 @@ export default function AppPage() {
           </div>
         </div>
 
-        <Dashboard />
+        <Dashboard latestUrgency={triage?.urgency} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
