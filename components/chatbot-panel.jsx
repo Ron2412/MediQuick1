@@ -39,7 +39,7 @@ function parseTriageResult(aiText) {
 
 export function ChatbotPanel({ onTriageResult }) {
   const [messages, setMessages] = useState([
-    { role: "assistant", name: "MediPal", content: "Hello! I'm MediPal, your friendly health assistant. How can I help you today?" }
+    { role: "assistant", name: "Mediquick Bot", content: "Hi! I'm Mediquick Bot, your friendly symptom analyzer 🤖. Tell me about your symptoms and I'll help you figure out what to do next!" }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);

@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { ChatbotPanel } from "@/components/chatbot-panel"
 import { TriageResultCard } from "@/components/triage-result-card"
+import { NearbyDoctors } from "@/components/nearby-doctors"
 import { FaCheckCircle } from "react-icons/fa"
 
 const defaultTriage = {
@@ -15,25 +16,48 @@ const healthScore = 85;
 const healthScoreText = healthScore > 80 ? "Excellent" : healthScore > 60 ? "Good" : "Needs Attention";
 const isExcellent = healthScore > 80;
 
+// Helper to extract triage info from AI response
+function parseTriageResult(aiText) {
+  let urgency = "green";
+  let reason = aiText;
+  let tip = "";
+
+  // Emergency (red):
+  if (/\b(emergency|immediate|urgent|ER|hospital|life[- ]?threatening|call 911|call your local emergency number|visit the nearest emergency room)\b/i.test(aiText)) {
+    urgency = "red";
+  }
+  // Clinic visit (yellow):
+  else if (/(clinic|doctor|visit|appointment|see a doctor|medical evaluation|consult a doctor|schedule a checkup|should be checked by a doctor)/i.test(aiText)) {
+    urgency = "yellow";
+  }
+  // Self-care (green):
+  else if (/(self[- ]?care|monitor|rest|hydration|home|observe|mild symptoms|no immediate action needed|can be managed at home)/i.test(aiText)) {
+    urgency = "green";
+  }
+
+  // Try to extract a tip (first bullet or sentence)
+  const bullet = aiText.match(/[-•]\s*(.+)/);
+  if (bullet) tip = bullet[1];
+  else tip = aiText.split(/[.\n]/)[0];
+
+  return { urgency, reason, tip };
+}
+
 export default function ChatPage() {
   const [triage, setTriage] = useState(null)
   return (
-    <div className="min-h-screen bg-[#f4f8fa]">
-      <div className="flex flex-col md:flex-row max-w-7xl mx-auto pt-8 gap-8 items-start min-h-[calc(100vh-80px)] box-border">
+    <div className="min-h-screen bg-[#f4f8fa] flex flex-col items-center">
+      <div className="flex flex-col md:flex-row max-w-7xl mx-auto pt-8 gap-8 items-start min-h-[calc(100vh-80px)] box-border w-full">
         {/* Chat Section */}
-        <div className="flex-1 flex flex-col justify-stretch box-border w-full">
-          <h1 className="text-3xl font-bold mb-6 text-[#0d181b]">Health Chat</h1>
+        <div className="flex-1 flex flex-col justify-stretch box-border w-full bg-white/70 backdrop-blur-md rounded-2xl shadow-none p-6 md:p-8 transition-all duration-300">
+          <h1 className="text-3xl font-bold mb-6 text-[#0d181b]">Symptom Analyzer</h1>
           <ChatbotPanel onTriageResult={result => {
-            if (typeof result === 'string') {
-              setTriage({ ...defaultTriage, reason: result })
-            } else {
-              setTriage(result)
-            }
+            setTriage(parseTriageResult(result))
           }} />
-         </div>
+        </div>
         {/* Sidebar */}
-        <aside className="w-full md:w-[340px] flex-shrink-0 flex flex-col gap-8 sticky top-8 self-start box-border max-h-[calc(100vh-100px)] overflow-auto">
-          <section className="rounded-3xl bg-gradient-to-br from-white via-emerald-50 to-emerald-100 shadow-xl p-7 flex flex-col items-center border-0 transition-all duration-300">
+        <aside className="w-full md:w-[340px] flex-shrink-0 flex flex-col gap-6 md:gap-8 box-border max-h-full md:mt-0 mt-8">
+          <section className="rounded-2xl bg-white/70 backdrop-blur-md p-7 flex flex-col items-center border-0 shadow-none transition-all duration-300">
             <div className="flex flex-col items-center w-full">
               <div className="relative flex flex-col items-center justify-center w-full">
                 <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -77,7 +101,7 @@ export default function ChatPage() {
               <p className="text-xs text-[#4c889a] text-center mt-2 max-w-[220px] leading-relaxed">Your current health score based on recent activity and AI insights.</p>
             </div>
           </section>
-          <section className="rounded-2xl bg-gradient-to-br from-white via-emerald-50 to-emerald-100 shadow-lg p-6 flex flex-col box-border border-0">
+          <section className="rounded-2xl bg-white/70 backdrop-blur-md p-6 flex flex-col box-border border-0 shadow-none">
             <h2 className="font-bold text-lg text-[#0d181b] mb-4">Triage Result</h2>
             <div>
               <TriageResultCard
@@ -89,6 +113,14 @@ export default function ChatPage() {
             </div>
           </section>
         </aside>
+      </div>
+      {/* Separated Nearby Doctors section below main chat/dashboard */}
+      <div className="max-w-4xl w-full mx-auto mb-8 px-2 md:px-0 animate-fade-in">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-1 rounded-full bg-gradient-to-r from-emerald-200 via-emerald-100 to-blue-100 opacity-70 mb-2" />
+          <h2 className="text-lg font-semibold text-[#0d181b] tracking-tight mb-1">Nearby Doctors</h2>
+        </div>
+        <NearbyDoctors />
       </div>
     </div>
   )

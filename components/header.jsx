@@ -10,17 +10,13 @@ export function MediQuickHeader() {
             <div className="bg-emerald-500 p-2 rounded-md">
               <Stethoscope className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-xl font-heading font-semibold text-slate-800">MediQuick</h1>
+            <h1 className="text-xl font-heading font-semibold text-slate-800">Mediquick</h1>
           </div>
           <div className="ml-auto flex items-center gap-4">
-            <button className="text-sm text-slate-600 hover:text-emerald-600">Dashboard</button>
-            <button className="text-sm text-slate-600 hover:text-emerald-600">History</button>
-            <Link href="/profile" legacyBehavior>
-              <a className="text-sm text-slate-600 hover:text-emerald-600">Profile</a>
-            </Link>
-            <button className="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-emerald-600 transition-colors">
-              Emergency
-            </button>
+            <Link href="/" className="text-sm text-slate-600 hover:text-emerald-600">Chat</Link>
+            <Link href="/profile" className="text-sm text-slate-600 hover:text-emerald-600">Profile</Link>
+            <Link href="/history" className="text-sm text-slate-600 hover:text-emerald-600">History</Link>
+            <Link href="/dashboard" className="text-sm text-slate-600 hover:text-emerald-600">Dashboard</Link>
           </div>
         </div>
       </div>
