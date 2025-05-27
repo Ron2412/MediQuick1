@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertTriangle, AlertCircle, CheckCircle } from "lucide-react"
 
-export function TriageResultCard({ urgency, reason, tip }) {
+export function TriageResultCard({ urgency, reason, tip, flat }) {
   // Configure based on urgency level
   const config = {
     green: {
@@ -31,6 +31,34 @@ export function TriageResultCard({ urgency, reason, tip }) {
   }
 
   const { icon: Icon, title, color, iconColor, textColor, badgeColor } = config[urgency]
+
+  if (flat) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Icon className={`h-5 w-5 ${iconColor}`} />
+          <span className={`font-semibold text-base ${textColor}`}>{title}</span>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-slate-700">Reason:</p>
+          <p className="text-sm text-slate-600">{reason}</p>
+        </div>
+        <div className="flex justify-between items-center mt-2">
+          <div className={`px-3 py-1 rounded-full flex items-center gap-1 ${badgeColor}`}>
+            {urgency === "green" && <span className="h-2 w-2 rounded-full bg-green-500"></span>}
+            {urgency === "yellow" && <span className="h-2 w-2 rounded-full bg-amber-500"></span>}
+            {urgency === "red" && <span className="h-2 w-2 rounded-full bg-red-500"></span>}
+            <span className="text-xs font-medium">
+              {urgency === "green" && "Low Urgency"}
+              {urgency === "yellow" && "Medium Urgency"}
+              {urgency === "red" && "High Urgency"}
+            </span>
+          </div>
+          <button className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">View Details</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Card className={`border-2 ${color}`}>

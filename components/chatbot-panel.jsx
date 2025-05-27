@@ -1,10 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Bot, Send, User } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { FaRobot, FaUserCircle } from "react-icons/fa"
+import { FaRegPaperPlane } from "react-icons/fa6"
+
+const assistantAvatar = "/doctor-avatar.png" // Place a doctor avatar image in public/
+const userAvatar = "/user-avatar.png" // Place a user avatar image in public/
 
 // Helper to extract triage info from AI response
 function parseTriageResult(aiText) {
@@ -36,7 +39,7 @@ function parseTriageResult(aiText) {
 
 export function ChatbotPanel({ onTriageResult }) {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello! I'm MediQuick, your AI health assistant. Tell me about your symptoms or health concerns, and I'll help you decide what to do next." }
+    { role: "assistant", name: "MediPal", content: "Hello! I'm MediPal, your friendly health assistant. How can I help you today?" }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,14 +53,17 @@ export function ChatbotPanel({ onTriageResult }) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
-
-    const newUserMessage = { role: "user", content: inputValue.trim() };
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+    const newUserMessage = {
+      role: "user",
+      name: "You",
+      content: inputValue.trim(),
+    };
+    setMessages((prev) => [...prev, newUserMessage]);
     setInputValue("");
     setIsLoading(true);
     setError(null);
@@ -66,21 +72,23 @@ export function ChatbotPanel({ onTriageResult }) {
       const res = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, newUserMessage] }), // Send entire history
+        body: JSON.stringify({ messages: [...messages, newUserMessage] }),
       });
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || `API request failed with status ${res.status}`);
       }
-
       const data = await res.json();
-      const aiMessage = { role: "assistant", content: data.text };
-      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+      const aiMessage = {
+        role: "assistant",
+        name: "MediPal",
+        content: data.text,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      if (onTriageResult) onTriageResult(data.text);
 
       // Parse triage result and set urgency banner if needed
       const triage = parseTriageResult(data.text);
-      if (onTriageResult) onTriageResult(triage);
       if (triage.urgency === "yellow") {
         setTriageBanner({
           color: "yellow",
@@ -118,7 +126,7 @@ export function ChatbotPanel({ onTriageResult }) {
       }
     } catch (err) {
       setError(err.message);
-      setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: `Error: ${err.message}` }]);
+      setMessages((prev) => [...prev, { role: "assistant", name: "MediPal", content: `Error: ${err.message}` }]);
     } finally {
       setIsLoading(false);
     }
@@ -132,80 +140,85 @@ export function ChatbotPanel({ onTriageResult }) {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="bg-emerald-50 rounded-t-lg">
-        <CardTitle className="flex items-center gap-2 font-heading">
-          <Bot className="h-6 w-6 text-emerald-600" />
-          MediQuick Assistant
-        </CardTitle>
-      </CardHeader>
-      {/* Triage Banner for urgency */}
-      {triageBanner && (
-        <div className={`p-4 text-base font-medium flex items-start gap-3 ${bannerColorClasses[triageBanner.color]}`}>
-          {triageBanner.icon}
-          <div>
-            <div className="font-bold uppercase tracking-wide text-sm mb-1">Triage: {triageBanner.label}</div>
-            <div>{triageBanner.message}</div>
-          </div>
-        </div>
-      )}
-      <CardContent className="flex-grow p-4 bg-white">
-        <div className="h-96 overflow-y-auto space-y-4" style={{ maxHeight: '24rem' }}>
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex items-start gap-3 ${
-                msg.role === "user" ? "justify-end" : ""
-              }`}
-            >
-              {msg.role === "assistant" && (
-                <Bot className="h-6 w-6 text-emerald-500 flex-shrink-0" />
-              )}
-              <div
-                className={`px-4 py-2 rounded-lg max-w-[75%] whitespace-pre-line ${
-                  msg.role === "user"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-800"
-                }`}
-              >
-                {msg.content}
+    <div className="relative flex flex-col h-[600px] max-h-[70vh] box-border bg-transparent">
+      <div className="flex-1 overflow-y-auto px-2 md:px-4 pt-2 pb-2 space-y-4 box-border" style={{paddingBottom: '76px'}}>
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}> 
+            {msg.role === "assistant" && (
+              <div className="flex items-start gap-2 max-w-[90%] md:max-w-[70%]">
+                <span className="flex items-center justify-center text-emerald-600 text-2xl mt-1">
+                  <FaRobot />
+                </span>
+                <div>
+                  <div className="text-xs font-semibold text-[#4c889a] mb-1">{msg.name}</div>
+                  <div className="bg-gradient-to-br from-emerald-50 to-white text-[#222] rounded-2xl px-4 py-3 text-sm shadow-md whitespace-pre-line max-w-[320px] md:max-w-[380px] break-words border-none">
+                    {msg.content}
+                  </div>
+                </div>
               </div>
-              {msg.role === "user" && (
-                <User className="h-6 w-6 text-emerald-700 flex-shrink-0" />
-              )}
+            )}
+            {msg.role === "user" && (
+              <div className="flex items-start gap-2 max-w-[90%] md:max-w-[70%] flex-row-reverse">
+                <span className="flex items-center justify-center text-[#2d7bb6] text-2xl mt-1">
+                  <FaUserCircle />
+                </span>
+                <div>
+                  <div className="text-xs font-semibold text-[#4c889a] mb-1 text-right">{msg.name}</div>
+                  <div className="bg-gradient-to-br from-blue-200 to-blue-100 text-[#1e293b] rounded-2xl px-4 py-3 text-sm shadow-md whitespace-pre-line text-right max-w-[320px] md:max-w-[380px] break-words border-none">
+                    {msg.content}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex items-center gap-2 mt-2 max-w-[90%] md:max-w-[70%]">
+            <span className="flex items-center justify-center text-emerald-600 text-2xl mt-1">
+              <FaRobot />
+            </span>
+            <div className="flex-1">
+              <div className="text-xs font-semibold text-[#4c889a] mb-1">MediPal</div>
+              <div className="bg-gradient-to-br from-emerald-50 to-white text-[#222] rounded-2xl px-4 py-3 text-sm shadow-md mb-2 flex items-center gap-2 max-w-[320px] md:max-w-[380px] border-none">
+                <span className="inline-block">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:0s]"></span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.2s] ml-1"></span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.4s] ml-1"></span>
+                </span>
+                <span>Thinking…</span>
+              </div>
             </div>
-          ))}
-          <div ref={messagesEndRef} />
-          {isLoading && (
-            <div className="flex items-center gap-2 text-slate-500">
-              <Bot className="h-5 w-5 animate-spin" />
-              <span>MediQuick is thinking...</span>
-            </div>
-          )}
-          {error && (
-             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md">
-               <p className="font-bold">Error</p>
-               <p>{error}</p>
-             </div>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 border-t bg-white rounded-b-lg">
-        <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
-          <Input
-            type="text"
-            placeholder="Ask about your symptoms..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={isLoading}
-            className="flex-grow"
-          />
-          <Button type="submit" disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-700">
-            <Send className="h-5 w-5" />
-            <span className="sr-only">Send</span>
-          </Button>
-        </form>
-      </CardFooter>
-    </Card>
-  );
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      <form onSubmit={handleSendMessage} className="absolute left-0 right-0 bottom-0 flex items-center gap-2 px-2 md:px-4 pb-2 pt-2 bg-transparent box-border border-none shadow-none" style={{height: '64px'}}>
+        <Input
+          type="text"
+          placeholder="Type your message…"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          disabled={isLoading}
+          className="flex-1 bg-gradient-to-br from-white/80 to-emerald-50/80 border-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 focus:ring-offset-white rounded-2xl px-5 py-3 text-base box-border shadow-lg transition-all duration-200 outline-none"
+        />
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="bg-[#2d7bb6] hover:bg-[#25609a] rounded-2xl px-6 py-3 text-base font-semibold flex items-center transition-transform duration-150 active:scale-95 group shadow-md border-none"
+        >
+          <span className="mr-1">Send</span>
+          <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 group-active:scale-110">
+            <FaRegPaperPlane className="animate-float" />
+          </span>
+        </Button>
+      </form>
+      {error && (
+        <div className="text-red-600 text-sm mt-2 px-4">{error}</div>
+      )}
+    </div>
+  )
 }
+
+// Add this to your global CSS or Tailwind config for the animated paper plane
+// .animate-float { animation: float 1.2s infinite alternate; }
+// @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-4px); } }

@@ -82,3 +82,13 @@
     @apply font-heading font-medium;
   }
 }
+
+@layer utilities {
+  .animate-float {
+    animation: float 1.2s infinite alternate;
+  }
+  @keyframes float {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+  }
+}

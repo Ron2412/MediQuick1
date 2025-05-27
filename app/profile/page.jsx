@@ -33,33 +33,51 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-slate-100 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-        <h1 className="text-4xl font-extrabold text-emerald-700 tracking-tight text-center mb-10">User Profile</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          <div className="flex flex-col items-center md:items-start">
-            {/* Clinic Visit Banner */}
-            {latestUrgency === "yellow" && (
-              <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 flex items-center gap-3 rounded">
-                <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-bold uppercase tracking-wide text-sm">Clinic Visit Recommended</span>
-              </div>
-            )}
-            <h2 className="text-2xl font-semibold text-slate-700 mb-4">Health Score</h2>
+    <div className="flex flex-col items-center min-h-screen bg-[#f8fbfc] py-10 px-4">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-slate-200 p-0">
+        <div className="flex flex-wrap justify-between gap-3 p-8 pb-2">
+          <div className="flex min-w-72 flex-col gap-3">
+            <p className="text-[#0d181b] tracking-light text-[32px] font-bold leading-tight">Health Score</p>
+            <p className="text-[#4c889a] text-sm font-normal leading-normal">Based on your recent entries</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-4 px-8 pb-4">
+          <div className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 bg-[#e7f0f3]">
             <HealthScorePanel history={recentTriageResults.length ? recentTriageResults : mockUser.recentEntries} />
           </div>
-          
-          <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-2xl font-semibold text-slate-700 mb-4">Health Card</h2>
-            <div className="w-full max-w-md"> {/* Ensure HealthCard doesn't stretch too much */}
-              <HealthCard user={mockUser} />
-            </div>
-            <div className="w-full mt-8">
-              {/* ChatbotPanel removed as per request */}
-            </div>
+        </div>
+        <h2 className="text-[#0d181b] text-[22px] font-bold leading-tight tracking-[-0.015em] px-8 pb-3 pt-5">Recent Activity</h2>
+        <div className="grid grid-cols-[40px_1fr] gap-x-2 px-8 pb-8">
+          {/* Timeline for recent activity */}
+          {mockUser.recentEntries.map((entry, idx) => (
+            <>
+              <div className="flex flex-col items-center gap-1 pt-3">
+                <div className={`text-[#0d181b]`}>
+                  {/* Icon based on urgency */}
+                  {entry.urgency === "green" && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256"><path d="M5 13l4 4L19 7" /></svg>
+                  )}
+                  {entry.urgency === "yellow" && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  )}
+                  {entry.urgency === "red" && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  )}
+                </div>
+                {idx < mockUser.recentEntries.length - 1 && <div className="w-[1.5px] bg-[#cfe2e7] h-2 grow"></div>}
+              </div>
+              <div className="flex flex-1 flex-col py-3">
+                <p className="text-[#0d181b] text-base font-medium leading-normal">{entry.symptom}</p>
+                <p className="text-[#4c889a] text-base font-normal leading-normal">{entry.notes}</p>
+                <p className="text-xs text-slate-400">{entry.date}</p>
+              </div>
+            </>
+          ))}
+        </div>
+        <div className="flex flex-col items-center md:items-start px-8 pb-8">
+          <h2 className="text-2xl font-semibold text-slate-700 mb-4">Health Card</h2>
+          <div className="w-full max-w-md">
+            <HealthCard user={mockUser} />
           </div>
         </div>
       </div>
